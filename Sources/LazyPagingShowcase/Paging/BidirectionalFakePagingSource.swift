@@ -17,6 +17,7 @@ public final class BidirectionalFakePagingSource: PagingSource<Int, SampleItem>,
     private let failOnRefresh: Bool
     private let failOnAppendPage: Int?
     private let failOnPrependPage: Int?
+    private let disablePlaceholders: Bool
 
     public init(
         totalItems: Int,
@@ -26,7 +27,8 @@ public final class BidirectionalFakePagingSource: PagingSource<Int, SampleItem>,
         emptyResult: Bool,
         failOnRefresh: Bool,
         failOnAppendPage: Int?,
-        failOnPrependPage: Int?
+        failOnPrependPage: Int?,
+        disablePlaceholders: Bool = false
     ) {
         self.totalItems = totalItems
         self.pageSize = pageSize
@@ -36,6 +38,7 @@ public final class BidirectionalFakePagingSource: PagingSource<Int, SampleItem>,
         self.failOnRefresh = failOnRefresh
         self.failOnAppendPage = failOnAppendPage
         self.failOnPrependPage = failOnPrependPage
+        self.disablePlaceholders = disablePlaceholders
     }
 
     /// Preserves scroll position on refresh: jumps back to the page closest
@@ -87,8 +90,8 @@ public final class BidirectionalFakePagingSource: PagingSource<Int, SampleItem>,
             items: items,
             previousKey: pageIndex > 0 ? pageIndex - 1 : nil,
             nextKey: pageIndex + 1 < totalPages ? pageIndex + 1 : nil,
-            itemsBefore: startIndex,
-            itemsAfter: totalItems - endIndex
+            itemsBefore: disablePlaceholders ? 0 : startIndex,
+            itemsAfter: disablePlaceholders ? 0 : totalItems - endIndex
         )
     }
 }

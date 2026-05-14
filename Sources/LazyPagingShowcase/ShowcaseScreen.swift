@@ -59,10 +59,23 @@ private struct ScenarioContent: View {
                     ErrorStateView(error: error) {
                         Task { await lazyPagingItems.retry() }
                     }
+                },
+                prependLoadingContent: { LoadingFooter(text: "Loading previous…") },
+                appendLoadingContent: { LoadingFooter(text: "Loading more…") },
+                prependErrorContent: { error in
+                    RetryFooter(message: "Failed to load previous page", error: error) {
+                        Task { await lazyPagingItems.retry() }
+                    }
+                },
+                appendErrorContent: { error in
+                    RetryFooter(message: "Failed to load next page", error: error) {
+                        Task { await lazyPagingItems.retry() }
+                    }
+                },
+                rowContent: { index in
+                    rowContent(at: index)
                 }
-            ) { index in
-                rowContent(at: index)
-            }
+            )
         }
     }
 
@@ -222,6 +235,52 @@ private struct ErrorStateView: View {
 }
 
 private struct BoundaryErrorRow: View {
+    let message: String
+    let error: any Error
+    let onRetry: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(message)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.red)
+                Text(error.localizedDescription)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+            Button("Retry", action: onRetry)
+                .buttonStyle(.bordered)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(.background)
+                .shadow(color: .black.opacity(0.05), radius: 2, y: 1)
+        )
+    }
+}
+
+private struct LoadingFooter: View {
+    let text: String
+
+    var body: some View {
+        HStack(spacing: 12) {
+            ProgressView()
+                .controlSize(.small)
+            Text(text)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            Spacer()
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity)
+    }
+}
+
+private struct RetryFooter: View {
     let message: String
     let error: any Error
     let onRetry: () -> Void
