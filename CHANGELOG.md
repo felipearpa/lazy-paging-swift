@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [0.0.3]
+### Added
+- **`PagingConfig.enablePlaceholders`** — caller-side switch (defaults to `true`) that forces `itemsBefore` / `itemsAfter` from the source to zero, mirroring AndroidX Paging's `enablePlaceholders`. Lets a consumer opt out of placeholder slots without modifying or wrapping the source. When `false`, `maxSize`-driven page drops also stop bumping placeholder counts — dropped items disappear from the index space (EOP clearing still happens so they can be re-fetched on scroll back).
+
+---
+
+## [0.0.2] - 2026-05-14
+### Added
+- **Prepend / append loading and error slots on `LazyPagingVStack` and `RefreshableLazyPagingVStack`** — four new `@ViewBuilder` slots (`prependLoadingContent`, `appendLoadingContent`, `prependErrorContent`, `appendErrorContent`) rendered above / below the items when `loadState.prepend` or `loadState.append` is `.loading` / `.failure`. Lets callers surface inline progress and retry affordances at the list edges without owning the load-state plumbing.
+- **Convenience inits** that default the four new slots to `EmptyView`, preserving the prior call sites for sources that carry loading/error affordances inside `placeholderContent`.
+
+---
+
 ## [0.0.1] - 2026-05-10
 ### Initial Release
 - **`LazyPagingVStack`** — SwiftUI `ScrollView`/`LazyVStack` that consumes `LazyPagingItems<Key, Item>` and renders dedicated slots for loading, empty, error, and content states, plus a `placeholderContent` slot rendered for every position where `lazyPagingItems[index]` is `nil`.

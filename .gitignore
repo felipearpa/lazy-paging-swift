@@ -5,3 +5,4 @@ Packages/
 *.xcodeproj
 Package.resolved
 xcuserdata/
+.claude/settings.local.json

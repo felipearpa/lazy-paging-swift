@@ -143,6 +143,58 @@ struct LazyPagingItemsLoadTests {
         #expect(source.loadCount(forPage: 1) == 2, "retry() must re-attempt the failed prepend")
     }
 
+    @Test("given enablePlaceholders false when refresh then placeholder counts are zeroed")
+    func given_enablePlaceholdersFalse_when_refresh_then_placeholderCountsAreZeroed() async {
+        // Source reports real itemsBefore/itemsAfter, but config switches them off.
+        let pager = Pager<Int, TestItem>(
+            config: PagingConfig(pageSize: 2, enablePlaceholders: false),
+            pagingSourceFactory: { NumberPagingSource(totalPages: 5, pageSize: 2) },
+            initialKey: 2
+        )
+        let items = LazyPagingItems(pager: pager)
+        await items.refresh()
+        #expect(items.itemsBefore == 0)
+        #expect(items.itemsAfter == 0)
+        #expect(items.itemCount == items.loadedItems.count)
+    }
+
+    @Test("given enablePlaceholders true when refresh then source placeholder counts surface")
+    func given_enablePlaceholdersTrue_when_refresh_then_sourcePlaceholderCountsSurface() async {
+        // Sanity-check baseline: the same source with placeholders enabled
+        // still reports nonzero itemsBefore/itemsAfter.
+        let pager = Pager<Int, TestItem>(
+            config: PagingConfig(pageSize: 2),
+            pagingSourceFactory: { NumberPagingSource(totalPages: 5, pageSize: 2) },
+            initialKey: 2
+        )
+        let items = LazyPagingItems(pager: pager)
+        await items.refresh()
+        #expect(items.itemsBefore == 4)
+        #expect(items.itemsAfter == 4)
+    }
+
+    @Test("given enablePlaceholders false with maxSize drop then dropped pages do not bump placeholders")
+    func given_enablePlaceholdersFalse_with_maxSizeDrop_then_droppedPagesDoNotBumpPlaceholders() async {
+        // pageSize 2, prefetchDistance 0, maxSize 4 → pageSize*2 + prefetch = 4
+        // → after one append, the head page must drop.
+        let pager = Pager<Int, TestItem>(
+            config: PagingConfig(
+                pageSize: 2,
+                prefetchDistance: 0,
+                maxSize: 4,
+                enablePlaceholders: false
+            ),
+            pagingSourceFactory: { NumberPagingSource(totalPages: 5, pageSize: 2) },
+            initialKey: 0
+        )
+        let items = LazyPagingItems(pager: pager)
+        await items.refresh()
+        await items.appendIfNeeded(currentIndex: 1) // triggers append, head drops
+        await items.appendIfNeeded(currentIndex: 3) // triggers another append, head drops again
+        #expect(items.itemsBefore == 0, "dropped head pages must not synthesize placeholders")
+        #expect(items.itemsAfter == 0)
+    }
+
     @Test("given source returning invalid then items stay empty after recovery refresh")
     func given_sourceReturningInvalid_when_refresh_then_refreshIsRetried() async {
         let pager = Pager<Int, TestItem>(

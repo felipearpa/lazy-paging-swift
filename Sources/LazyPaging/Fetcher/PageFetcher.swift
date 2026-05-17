@@ -95,13 +95,14 @@ public actor PageFetcher<Key: Hashable & Sendable, Item: Sendable> {
             }
 
             let dropped = applyMaxSizeDropIfNeeded(oppositeOf: kind)
+            let placeholdersOn = pager.config.enablePlaceholders
 
             return .page(
                 items: items,
                 previousKey: newPrevious,
                 nextKey: newNext,
-                itemsBefore: itemsBefore,
-                itemsAfter: itemsAfter,
+                itemsBefore: placeholdersOn ? itemsBefore : 0,
+                itemsAfter: placeholdersOn ? itemsAfter : 0,
                 droppedFromHead: dropped.head,
                 droppedFromTail: dropped.tail
             )

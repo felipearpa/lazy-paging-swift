@@ -277,7 +277,9 @@ public final class LazyPagingItems<Key: Hashable & Sendable, Item: Identifiable 
                 itemsBefore = newItemsBefore
                 if droppedFromTail > 0 {
                     loadedItems.removeLast(droppedFromTail)
-                    itemsAfter += droppedFromTail
+                    if pager.config.enablePlaceholders {
+                        itemsAfter += droppedFromTail
+                    }
                 }
                 setSourcePrependNotLoading(
                     prependEOP: previousKey == nil,
@@ -288,7 +290,9 @@ public final class LazyPagingItems<Key: Hashable & Sendable, Item: Identifiable 
                 itemsAfter = newItemsAfter
                 if droppedFromHead > 0 {
                     loadedItems.removeFirst(droppedFromHead)
-                    itemsBefore += droppedFromHead
+                    if pager.config.enablePlaceholders {
+                        itemsBefore += droppedFromHead
+                    }
                 }
                 setSourceAppendNotLoading(
                     appendEOP: nextKey == nil,

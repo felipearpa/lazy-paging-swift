@@ -23,6 +23,8 @@ The column iterates `0..<itemCount` and renders `itemContent(item)` for loaded s
 
 Leave `itemsBefore` and `itemsAfter` as `0` (the default) if you don't know the total size — no placeholders are rendered, the list grows as pages stream in.
 
+If you do know the total size but want to opt out of placeholders at the call site (instead of changing the source), set `enablePlaceholders: false` on `PagingConfig`. The flag forces `itemsBefore` / `itemsAfter` to zero regardless of what the source reports, and `maxSize`-driven page drops stop bumping placeholder counts too — dropped items simply disappear from the index space. Defaults to `true`.
+
 ## Anchor-preserving refresh
 
 On refresh, the pager calls `PagingSource.getRefreshKey(state:)` with a `PagingState` that carries the currently loaded pages, the config, and the user's last-visible `anchorPosition`. Override it to jump back to roughly where the user was — the default returns `nil`, which falls through to `Pager.initialKey`.
@@ -191,7 +193,7 @@ Pager(
 )
 ```
 
-After a successful **append**, pages are dropped from the **head** until the total is within `maxSize`; after a successful **prepend**, pages are dropped from the **tail**. Dropped ranges reappear as placeholders (`itemsBefore` / `itemsAfter` are bumped) and the opposite direction's `endOfPaginationReached` is cleared so the dropped pages can be re-fetched on scroll back.
+After a successful **append**, pages are dropped from the **head** until the total is within `maxSize`; after a successful **prepend**, pages are dropped from the **tail**. Dropped ranges reappear as placeholders (`itemsBefore` / `itemsAfter` are bumped) and the opposite direction's `endOfPaginationReached` is cleared so the dropped pages can be re-fetched on scroll back. With `enablePlaceholders: false`, the EOP clearing still happens but the placeholder counts are not bumped — dropped items drop out of the index space.
 
 `maxSize` must be at least `pageSize * 2 + prefetchDistance` — caught by an assertion at `PagingConfig.init` to stop you shipping a thrashing config.
 

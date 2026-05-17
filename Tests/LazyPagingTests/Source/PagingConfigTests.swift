@@ -46,4 +46,16 @@ struct PagingConfigTests {
         let b = PagingConfig(pageSize: 20)
         #expect(a == b)
     }
+
+    @Test("given only pageSize when initialised then enablePlaceholders defaults to true")
+    func given_onlyPageSize_when_initialised_then_enablePlaceholdersDefaultsToTrue() {
+        let config = PagingConfig(pageSize: 20)
+        #expect(config.enablePlaceholders == true)
+    }
+
+    @Test("given enablePlaceholders false when initialised then it is stored")
+    func given_enablePlaceholdersFalse_when_initialised_then_isStored() {
+        let config = PagingConfig(pageSize: 20, enablePlaceholders: false)
+        #expect(config.enablePlaceholders == false)
+    }
 }

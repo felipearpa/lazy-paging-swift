@@ -26,17 +26,27 @@ public struct PagingConfig: Sendable, Equatable {
     /// catches this at construction time.
     public let maxSize: Int?
 
+    /// When `true` (the default), `itemsBefore` / `itemsAfter` reported by
+    /// the source surface as placeholder slots in ``LazyPagingItems``. When
+    /// `false`, those counts are forced to zero regardless of what the source
+    /// returns — the caller-side switch off, mirroring AndroidX Paging's
+    /// `enablePlaceholders`. `maxSize`-driven page drops also stop producing
+    /// placeholder slots; dropped items disappear from the index space.
+    public let enablePlaceholders: Bool
+
     public init(
         pageSize: Int,
         initialLoadSize: Int? = nil,
         prefetchDistance: Int? = nil,
-        maxSize: Int? = nil
+        maxSize: Int? = nil,
+        enablePlaceholders: Bool = true
     ) {
         precondition(pageSize > 0, "pageSize must be positive")
         self.pageSize = pageSize
         self.initialLoadSize = initialLoadSize ?? pageSize
         self.prefetchDistance = prefetchDistance ?? pageSize
         self.maxSize = maxSize
+        self.enablePlaceholders = enablePlaceholders
         precondition(self.initialLoadSize > 0, "initialLoadSize must be positive")
         precondition(self.prefetchDistance >= 0, "prefetchDistance must be non-negative")
         if let maxSize {
